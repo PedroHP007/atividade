@@ -2,39 +2,58 @@
 #include <vector>
 using namespace std;
 
-struct No {
-    int dado;
-    No* esquerda;
-    No* direita;
+struct NoArvore {
+    int data;
+    NoArvore* esquerda;
+    NoArvore* direita;
 };
 
-void coletarEmOrdem(No* raiz, vector<int>& elementos) {
-    if (raiz == nullptr) return;
-    coletarEmOrdem(raiz->esquerda, elementos);
-    elementos.push_back(raiz->dado);
-    coletarEmOrdem(raiz->direita, elementos);
+void listarEmOrdem(NoArvore* raiz, vector<int>& elementos) {
+    if (raiz == NULL) {
+        return;
+    }
+
+    listarEmOrdem(raiz->esquerda, elementos);
+    elementos.push_back(raiz->data);
+    listarEmOrdem(raiz->direita, elementos);
 }
 
-bool mesmoConjunto(No* arvore1, No* arvore2) {
+int mesmoConjunto(NoArvore* raiz1, NoArvore* raiz2) {
     vector<int> elementos1;
     vector<int> elementos2;
-    coletarEmOrdem(arvore1, elementos1);
-    coletarEmOrdem(arvore2, elementos2);
-    // Em uma BST sem duplicatas, a travessia em ordem produz os elementos
-    // ordenados. Assim, a comparação não depende da estrutura das árvores.
-    return elementos1 == elementos2;
+
+    listarEmOrdem(raiz1, elementos1);
+    listarEmOrdem(raiz2, elementos2);
+
+    if (elementos1.size() != elementos2.size()) {
+        return 0;
+    }
+
+    for (int i = 0; i < elementos1.size(); i++) {
+        if (elementos1[i] != elementos2[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 int main() {
-    No a1{2, nullptr, nullptr}, a2{1, nullptr, nullptr}, a3{3, nullptr, nullptr};
-    a1.esquerda = &a2;
-    a1.direita = &a3;
+    NoArvore raiz1{2, NULL, NULL};
+    NoArvore noEsquerdo1{1, NULL, NULL};
+    NoArvore noDireito1{3, NULL, NULL};
+    raiz1.esquerda = &noEsquerdo1;
+    raiz1.direita = &noDireito1;
 
-    No b1{1, nullptr, nullptr}, b2{3, nullptr, nullptr}, b3{2, nullptr, nullptr};
-    b2.esquerda = &b3;
-    b1.direita = &b2;
+    NoArvore raiz2{1, NULL, NULL};
+    NoArvore noDireito2{3, NULL, NULL};
+    NoArvore noEsquerdo2{2, NULL, NULL};
+    raiz2.direita = &noDireito2;
+    noDireito2.esquerda = &noEsquerdo2;
 
-    cout << (mesmoConjunto(&a1, &b1)
-                 ? "As árvores possuem o mesmo conjunto de elementos.\n"
-                 : "As árvores possuem conjuntos diferentes.\n");
+    if (mesmoConjunto(&raiz1, &raiz2) == 1) {
+        cout << "As arvores possuem o mesmo conjunto de elementos." << endl;
+    } else {
+        cout << "As arvores possuem conjuntos diferentes." << endl;
+    }
 }

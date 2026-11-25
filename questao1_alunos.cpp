@@ -11,91 +11,119 @@ struct No {
     Aluno aluno;
     No* esquerda;
     No* direita;
-
-    explicit No(const Aluno& valor)
-        : aluno(valor), esquerda(nullptr), direita(nullptr) {}
 };
 
-// As três operações da BST: inserir, buscar e remover.
-void inserir(No*& raiz, const Aluno& aluno) {
-    if (raiz == nullptr) {
-        raiz = new No(aluno);
-    } else if (aluno.matricula < raiz->aluno.matricula) {
-        inserir(raiz->esquerda, aluno);
-    } else if (aluno.matricula > raiz->aluno.matricula) {
-        inserir(raiz->direita, aluno);
-    } else {
-        // Matrículas são únicas; ao repetir, atualiza o cadastro.
-        raiz->aluno = aluno;
-    }
-}
+No* inserirBST(No*& raiz, Aluno aluno) {
+    if (raiz == NULL) {
+        No* novoNo = new No;
+        novoNo->aluno = aluno;
+        novoNo->esquerda = NULL;
+        novoNo->direita = NULL;
 
-No* buscar(No* raiz, int matricula) {
-    if (raiz == nullptr || raiz->aluno.matricula == matricula) {
+        raiz = novoNo;
         return raiz;
     }
-    if (matricula < raiz->aluno.matricula) {
-        return buscar(raiz->esquerda, matricula);
-    }
-    return buscar(raiz->direita, matricula);
-}
 
-No* menorNo(No* raiz) {
-    while (raiz != nullptr && raiz->esquerda != nullptr) {
-        raiz = raiz->esquerda;
+    if (aluno.matricula > raiz->aluno.matricula) {
+        raiz->direita = inserirBST(raiz->direita, aluno);
     }
+
+    if (aluno.matricula < raiz->aluno.matricula) {
+        raiz->esquerda = inserirBST(raiz->esquerda, aluno);
+    }
+
     return raiz;
 }
 
-void remover(No*& raiz, int matricula) {
-    if (raiz == nullptr) return;
+No* buscaBST(No*& raiz, int matricula) {
+    if (raiz == NULL || raiz->aluno.matricula == matricula) {
+        return raiz;
+    }
 
     if (matricula < raiz->aluno.matricula) {
-        remover(raiz->esquerda, matricula);
-    } else if (matricula > raiz->aluno.matricula) {
-        remover(raiz->direita, matricula);
-    } else if (raiz->esquerda == nullptr || raiz->direita == nullptr) {
-        No* antigo = raiz;
-        raiz = (raiz->esquerda != nullptr) ? raiz->esquerda : raiz->direita;
-        delete antigo;
+        return buscaBST(raiz->esquerda, matricula);
     } else {
-        No* sucessor = menorNo(raiz->direita);
-        raiz->aluno = sucessor->aluno;
-        remover(raiz->direita, sucessor->aluno.matricula);
+        return buscaBST(raiz->direita, matricula);
     }
 }
 
+No* removerBST(No*& raiz, int matricula) {
+    if (raiz == NULL) {
+        return NULL;
+    }
+
+    if (matricula < raiz->aluno.matricula) {
+        raiz->esquerda = removerBST(raiz->esquerda, matricula);
+    } else if (matricula > raiz->aluno.matricula) {
+        raiz->direita = removerBST(raiz->direita, matricula);
+    } else {
+        if (raiz->esquerda == NULL && raiz->direita == NULL) {
+            delete raiz;
+            raiz = NULL;
+            return raiz;
+        } else if (raiz->esquerda == NULL) {
+            No* aux = raiz;
+            raiz = raiz->direita;
+            delete aux;
+        } else if (raiz->direita == NULL) {
+            No* aux = raiz;
+            raiz = raiz->esquerda;
+            delete aux;
+        } else {
+            No* aux = raiz->esquerda;
+
+            while (aux->direita != NULL) {
+                aux = aux->direita;
+            }
+
+            raiz->aluno = aux->aluno;
+            raiz->esquerda = removerBST(raiz->esquerda, aux->aluno.matricula);
+        }
+    }
+
+    return raiz;
+}
+
 void listarEmOrdem(No* raiz) {
-    if (raiz == nullptr) return;
+    if (raiz == NULL) {
+        return;
+    }
+
     listarEmOrdem(raiz->esquerda);
-    cout << raiz->aluno.matricula << " - " << raiz->aluno.nome << '\n';
+    cout << raiz->aluno.matricula << " - " << raiz->aluno.nome << endl;
     listarEmOrdem(raiz->direita);
 }
 
 void liberar(No* raiz) {
-    if (raiz == nullptr) return;
+    if (raiz == NULL) {
+        return;
+    }
+
     liberar(raiz->esquerda);
     liberar(raiz->direita);
     delete raiz;
 }
 
 int main() {
-    No* raiz = nullptr;
-    inserir(raiz, {2024003, "Ana"});
-    inserir(raiz, {2024001, "Bruno"});
-    inserir(raiz, {2024005, "Carla"});
+    No* raiz = NULL;
 
-    cout << "Alunos em ordem de matrícula:\n";
+    inserirBST(raiz, {2024003, "Ana"});
+    inserirBST(raiz, {2024001, "Bruno"});
+    inserirBST(raiz, {2024005, "Carla"});
+
+    cout << "Alunos em ordem de matricula:" << endl;
     listarEmOrdem(raiz);
 
-    if (No* aluno = buscar(raiz, 2024001)) {
-        cout << "Encontrado: " << aluno->aluno.nome << '\n';
+    No* aluno = buscaBST(raiz, 2024001);
+    if (aluno != NULL) {
+        cout << "Encontrado: " << aluno->aluno.nome << endl;
     } else {
-        cout << "Matrícula não encontrada.\n";
+        cout << "Matricula nao encontrada." << endl;
     }
 
-    remover(raiz, 2024003);
-    cout << "Após remover a matrícula 2024003:\n";
+    removerBST(raiz, 2024003);
+    cout << "Apos remover a matricula 2024003:" << endl;
     listarEmOrdem(raiz);
+
     liberar(raiz);
 }

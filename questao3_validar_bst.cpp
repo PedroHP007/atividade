@@ -1,39 +1,51 @@
 #include <iostream>
-#include <limits>
 using namespace std;
 
-struct No {
-    int dado;
-    No* esquerda;
-    No* direita;
+struct NoArvore {
+    int data;
+    NoArvore* esquerda;
+    NoArvore* direita;
 };
 
-bool validarBST(No* raiz, long long minimo, long long maximo) {
-    if (raiz == nullptr) return true;
-    if (raiz->dado <= minimo || raiz->dado >= maximo) return false;
+int validarBST(NoArvore* raiz, NoArvore*& anterior) {
+    if (raiz == NULL) {
+        return 1;
+    }
 
-    return validarBST(raiz->esquerda, minimo, raiz->dado) &&
-           validarBST(raiz->direita, raiz->dado, maximo);
+    if (validarBST(raiz->esquerda, anterior) == 0) {
+        return 0;
+    }
+
+    if (anterior != NULL && raiz->data <= anterior->data) {
+        return 0;
+    }
+
+    anterior = raiz;
+    return validarBST(raiz->direita, anterior);
 }
 
-bool ehBST(No* raiz) {
-    return validarBST(raiz, numeric_limits<long long>::lowest(),
-                      numeric_limits<long long>::max());
+int ehBST(NoArvore* raiz) {
+    NoArvore* anterior = NULL;
+    return validarBST(raiz, anterior);
 }
 
 int main() {
-    No n1{10, nullptr, nullptr};
-    No n2{5, nullptr, nullptr};
-    No n3{15, nullptr, nullptr};
-    No raiz{10, &n2, &n3};
+    NoArvore noEsquerdo{5, NULL, NULL};
+    NoArvore noDireito{15, NULL, NULL};
+    NoArvore raiz{10, &noEsquerdo, &noDireito};
 
-    cout << (ehBST(&raiz) ? "A árvore é uma BST válida.\n"
-                          : "A árvore não é uma BST válida.\n");
+    if (ehBST(&raiz) == 1) {
+        cout << "A arvore e uma BST valida." << endl;
+    } else {
+        cout << "A arvore nao e uma BST valida." << endl;
+    }
 
-    // Este caso demonstra que não basta comparar apenas pai e filhos:
-    // 12 está na subárvore esquerda de 10, portanto invalida a BST.
-    No invalido{12, nullptr, nullptr};
-    n2.direita = &invalido;
-    cout << (ehBST(&raiz) ? "A árvore é uma BST válida.\n"
-                          : "A árvore não é uma BST válida.\n");
+    NoArvore noInvalido{12, NULL, NULL};
+    noEsquerdo.direita = &noInvalido;
+
+    if (ehBST(&raiz) == 1) {
+        cout << "A arvore e uma BST valida." << endl;
+    } else {
+        cout << "A arvore nao e uma BST valida." << endl;
+    }
 }

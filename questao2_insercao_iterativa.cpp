@@ -1,62 +1,82 @@
 #include <iostream>
 using namespace std;
 
-struct No {
-    int dado;
-    No* esquerda;
-    No* direita;
-
-    explicit No(int valor) : dado(valor), esquerda(nullptr), direita(nullptr) {}
+struct NoArvore {
+    int data;
+    NoArvore* esquerda;
+    NoArvore* direita;
 };
 
-// Insere sem recursividade. Valores repetidos são ignorados.
-void inserirIterativo(No*& raiz, int valor) {
-    if (raiz == nullptr) {
-        raiz = new No(valor);
+void inserirBSTIterativo(NoArvore*& raiz, int chave) {
+    if (raiz == NULL) {
+        NoArvore* novoNo = new NoArvore;
+        novoNo->data = chave;
+        novoNo->esquerda = NULL;
+        novoNo->direita = NULL;
+        raiz = novoNo;
         return;
     }
 
-    No* atual = raiz;
-    No* pai = nullptr;
-    while (atual != nullptr) {
+    NoArvore* atual = raiz;
+    NoArvore* pai = NULL;
+
+    while (atual != NULL) {
         pai = atual;
-        if (valor < atual->dado) {
+
+        if (chave < atual->data) {
             atual = atual->esquerda;
-        } else if (valor > atual->dado) {
+        } else if (chave > atual->data) {
             atual = atual->direita;
         } else {
-            return; // Não permite valores duplicados.
+            return;
         }
     }
 
-    if (valor < pai->dado) {
-        pai->esquerda = new No(valor);
+    NoArvore* novoNo = new NoArvore;
+    novoNo->data = chave;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+
+    if (chave < pai->data) {
+        pai->esquerda = novoNo;
     } else {
-        pai->direita = new No(valor);
+        pai->direita = novoNo;
     }
 }
 
-void listarEmOrdem(No* raiz) {
-    if (raiz == nullptr) return;
+void listarEmOrdem(NoArvore* raiz) {
+    if (raiz == NULL) {
+        return;
+    }
+
     listarEmOrdem(raiz->esquerda);
-    cout << raiz->dado << ' ';
+    cout << raiz->data << endl;
     listarEmOrdem(raiz->direita);
 }
 
-void liberar(No* raiz) {
-    if (raiz == nullptr) return;
+void liberar(NoArvore* raiz) {
+    if (raiz == NULL) {
+        return;
+    }
+
     liberar(raiz->esquerda);
     liberar(raiz->direita);
     delete raiz;
 }
 
 int main() {
-    No* raiz = nullptr;
-    int valores[] = {50, 30, 70, 20, 40, 60, 80};
-    for (int valor : valores) inserirIterativo(raiz, valor);
+    NoArvore* raiz = NULL;
 
-    cout << "Elementos em ordem: ";
+    inserirBSTIterativo(raiz, 50);
+    inserirBSTIterativo(raiz, 30);
+    inserirBSTIterativo(raiz, 70);
+    inserirBSTIterativo(raiz, 20);
+    inserirBSTIterativo(raiz, 40);
+    inserirBSTIterativo(raiz, 60);
+    inserirBSTIterativo(raiz, 80);
+
+    cout << "Elementos em ordem:" << endl;
     listarEmOrdem(raiz);
-    cout << '\n';
+
     liberar(raiz);
 }
